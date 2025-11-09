@@ -6,6 +6,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class BudgetBeesApiApplication {
 
+
+
+
+	
   public static void main(final String[] args) {
     SpringApplication.run(BudgetBeesApiApplication.class, args);
   }
