@@ -47,9 +47,9 @@
       <property name="tokens" value="METHOD_DEF, CTOR_DEF"/>
     </module>
 
-    <!-- Optional: turn on Javadoc once codebase is ready
+    <!-- Optional: turn on Javadoc once codebase is ready -->
     <module name="JavadocType"/>
     <module name="JavadocMethod"/>
-    -->
+    
   </module>
 </module>
