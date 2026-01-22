@@ -2,7 +2,7 @@ plugins {
 	id 'java'
 	id 'jacoco'
 	id 'com.diffplug.spotless' version '6.25.0'
-	id 'org.springframework.boot' version '3.5.7'
+	id 'org.springframework.boot' version '4.0.1'
 	id 'io.spring.dependency-management' version '1.1.7'
 }
 
@@ -57,6 +57,12 @@ tasks.named("check") {
     dependsOn("spotlessCheck")
 }
 
+dependencyManagement {
+	imports {
+		mavenBom "org.testcontainers:testcontainers-bom:1.20.1"
+	}
+}
+
 configurations {
 	compileOnly {
 		extendsFrom annotationProcessor
@@ -71,8 +77,13 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'com.fasterxml.jackson.core:jackson-databind'
+	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'org.postgresql:postgresql'
+	runtimeOnly 'com.h2database:h2'
 	annotationProcessor 'org.projectlombok:lombok'
 	testCompileOnly 'org.projectlombok:lombok'
 	testAnnotationProcessor 'org.projectlombok:lombok'
@@ -86,4 +97,8 @@ dependencies {
 
 tasks.named('test') {
 	useJUnitPlatform()
+	testLogging {
+		events "passed", "skipped", "failed", "standardOut", "standardError"
+		showStandardStreams = true
+	}
 }

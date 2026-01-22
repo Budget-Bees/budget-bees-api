@@ -16,13 +16,11 @@ public abstract class AbstractContainerTest {
   private static final PostgreSQLContainer<?> POSTGRESQL_CONTAINER;
 
   static {
-    POSTGRESQL_CONTAINER =
-        new PostgreSQLContainer<>("postgres:16")
-            .withDatabaseName("budget_bees")
-            .withUsername("budget_bees")
-            .withPassword("budget_bees");
+    POSTGRESQL_CONTAINER = new PostgreSQLContainer<>("postgres:16")
+        .withDatabaseName("budget_bees")
+        .withUsername("budget_bees")
+        .withPassword("budget_bees");
     POSTGRESQL_CONTAINER.start();
-    runLiquibaseAgainstContainer();
   }
 
   @DynamicPropertySource
@@ -30,6 +28,10 @@ public abstract class AbstractContainerTest {
     registry.add("spring.datasource.url", POSTGRESQL_CONTAINER::getJdbcUrl);
     registry.add("spring.datasource.username", POSTGRESQL_CONTAINER::getUsername);
     registry.add("spring.datasource.password", POSTGRESQL_CONTAINER::getPassword);
+  }
+
+  static {
+    runLiquibaseAgainstContainer();
   }
 
   private static void runLiquibaseAgainstContainer() {
@@ -47,20 +49,19 @@ public abstract class AbstractContainerTest {
 
     if (!dbDir.exists()) {
       log.warn("budget-bees-db directory not found at: {}", dbDir.getAbsolutePath());
+      return;
     } else {
       log.info("budget-bees-db directory found at: {}", dbDir.getAbsolutePath());
     }
 
     boolean isWindows = System.getProperty("os.name").toLowerCase().contains("win");
-    File gradlew = new File(dbDir, isWindows ? "gradlew.bat" : "gradlew");
+    String mvnCommand = new File(dbDir, isWindows ? "mvnw.cmd" : "mvnw").exists()
+        ? (isWindows ? "mvnw.cmd" : "./mvnw")
+        : "mvn";
 
-    if (!gradlew.exists()) {
-      log.warn("gradlew not found at: {}", gradlew.getAbsolutePath());
-    } else {
-      log.info("Using gradlew script: {}", gradlew.getAbsolutePath());
-    }
+    log.info("Using Maven command: {}", mvnCommand);
 
-    ProcessBuilder pb = new ProcessBuilder(gradlew.getAbsolutePath(), "update");
+    ProcessBuilder pb = new ProcessBuilder(mvnCommand, "liquibase:update");
 
     pb.environment().put("LIQUIBASE_URL", jdbc);
     pb.environment().put("LIQUIBASE_USERNAME", user);
@@ -76,8 +77,7 @@ public abstract class AbstractContainerTest {
     try {
       Process process = pb.start();
 
-      try (var reader =
-          new java.io.BufferedReader(new java.io.InputStreamReader(process.getInputStream()))) {
+      try (var reader = new java.io.BufferedReader(new java.io.InputStreamReader(process.getInputStream()))) {
         String line;
         while ((line = reader.readLine()) != null) {
           log.info("[liquibase] {}", line);
